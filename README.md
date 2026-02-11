@@ -1,16 +1,24 @@
-# React + Vite
+# Prompt Comparator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A simple, split-screen tool to compare two OpenAI System Prompts side-by-side.
 
-Currently, two official plugins are available:
+## Features
+- **Dual Chat**: Chat with two different "personas" simultaneously.
+- **Privacy**: API Key is stored only in your browser (LocalStorage).
+- **Export**: Download your chat datasets as JSON.
+- **Responsive**: Works on desktop and mobile.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## How to use
+1. Go to the [Live Demo](https://dev-bluelephant.github.io/Prompt-Comparator/).
+2. Click **Settings** (top right).
+3. Enter your OpenAI API Key.
+4. Set two different System Prompts (e.g., "You offer concise advice" vs "You explain things like to a 5 year old").
+5. Start chatting!
 
-## React Compiler
+## Running Locally
+1. Clone the repo.
+2. `npm install`
+3. `npm run dev`
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Deployment
+This project is configured to deploy automatically to GitHub Pages via GitHub Actions.
