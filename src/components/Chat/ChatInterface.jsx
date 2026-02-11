@@ -20,12 +20,15 @@ const ModelSelector = ({ config, onConfigChange, side }) => {
                 value={config.provider}
                 onChange={(e) => onConfigChange({ ...config, provider: e.target.value, model: PROVIDERS[e.target.value].models[0].id })}
                 style={{
-                    backgroundColor: 'transparent',
+                    backgroundColor: 'var(--bg-tertiary)',
                     color: accentColor,
                     fontWeight: 600,
                     padding: '0.25rem',
                     fontSize: '0.85rem',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    borderRadius: 'var(--radius-sm)',
+                    border: 'none',
+                    outline: 'none'
                 }}
             >
                 {Object.values(PROVIDERS).map(p => (
@@ -39,12 +42,15 @@ const ModelSelector = ({ config, onConfigChange, side }) => {
                 value={config.model}
                 onChange={(e) => onConfigChange({ ...config, model: e.target.value })}
                 style={{
-                    backgroundColor: 'transparent',
+                    backgroundColor: 'var(--bg-tertiary)',
                     color: 'var(--text-secondary)',
                     padding: '0.25rem',
                     fontSize: '0.85rem',
                     cursor: 'pointer',
-                    flex: 1
+                    flex: 1,
+                    borderRadius: 'var(--radius-sm)',
+                    border: 'none',
+                    outline: 'none'
                 }}
             >
                 {PROVIDERS[config.provider] && PROVIDERS[config.provider].models.map(m => (
