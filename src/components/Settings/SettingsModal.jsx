@@ -3,6 +3,8 @@ import { X, Save } from 'lucide-react';
 
 const SettingsModal = ({ isOpen, onClose, onSave, initialSettings }) => {
     const [apiKey, setApiKey] = useState('');
+    const [anthropicKey, setAnthropicKey] = useState('');
+    const [googleKey, setGoogleKey] = useState('');
     const [model, setModel] = useState('gpt-3.5-turbo');
     const [systemPromptA, setSystemPromptA] = useState('');
     const [systemPromptB, setSystemPromptB] = useState('');
@@ -10,7 +12,8 @@ const SettingsModal = ({ isOpen, onClose, onSave, initialSettings }) => {
     useEffect(() => {
         if (isOpen) {
             setApiKey(initialSettings.apiKey || '');
-            setModel(initialSettings.model || 'gpt-3.5-turbo');
+            setAnthropicKey(initialSettings.anthropicKey || '');
+            setGoogleKey(initialSettings.googleKey || '');
             setSystemPromptA(initialSettings.systemPromptA || 'You are a helpful assistant.');
             setSystemPromptB(initialSettings.systemPromptB || 'You are a helpful assistant.');
         }
@@ -20,7 +23,13 @@ const SettingsModal = ({ isOpen, onClose, onSave, initialSettings }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave({ apiKey, model, systemPromptA, systemPromptB });
+        onSave({
+            apiKey,
+            anthropicKey,
+            googleKey,
+            systemPromptA,
+            systemPromptB
+        });
         onClose();
     };
 
@@ -80,55 +89,68 @@ const SettingsModal = ({ isOpen, onClose, onSave, initialSettings }) => {
                 </div>
 
                 <form onSubmit={handleSubmit} style={{ padding: '1.5rem' }}>
-                    <div>
-                        <label style={labelStyle}>OpenAI API Key</label>
-                        <input
-                            type="password"
-                            value={apiKey}
-                            onChange={(e) => setApiKey(e.target.value)}
-                            placeholder="sk-..."
-                            style={inputStyle}
-                            required
-                        />
-                    </div>
 
-                    <div>
-                        <label style={labelStyle}>Model</label>
-                        <select
-                            value={model}
-                            onChange={(e) => setModel(e.target.value)}
-                            style={inputStyle}
-                        >
-                            <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
-                            <option value="gpt-4">gpt-4</option>
-                            <option value="gpt-4-turbo">gpt-4-turbo</option>
-                            <option value="gpt-4o">gpt-4o</option>
-                            <option value="gpt-4o-mini">gpt-4o-mini</option>
-                        </select>
-                    </div>
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <h3 style={{ fontSize: '1rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>API Keys</h3>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                        <div>
-                            <label style={{ ...labelStyle, color: 'var(--accent-prompt-a)' }}>System Prompt A</label>
-                            <textarea
-                                value={systemPromptA}
-                                onChange={(e) => setSystemPromptA(e.target.value)}
-                                rows={6}
-                                style={{ ...inputStyle, resize: 'vertical' }}
+                        <div style={{ marginBottom: '1rem' }}>
+                            <label style={labelStyle}>OpenAI API Key</label>
+                            <input
+                                type="password"
+                                value={apiKey}
+                                onChange={(e) => setApiKey(e.target.value)}
+                                placeholder="sk-..."
+                                style={inputStyle}
                             />
                         </div>
-                        <div>
-                            <label style={{ ...labelStyle, color: 'var(--accent-prompt-b)' }}>System Prompt B</label>
-                            <textarea
-                                value={systemPromptB}
-                                onChange={(e) => setSystemPromptB(e.target.value)}
-                                rows={6}
-                                style={{ ...inputStyle, resize: 'vertical' }}
+
+                        <div style={{ marginBottom: '1rem' }}>
+                            <label style={labelStyle}>Anthropic API Key</label>
+                            <input
+                                type="password"
+                                value={anthropicKey}
+                                onChange={(e) => setAnthropicKey(e.target.value)}
+                                placeholder="sk-ant-..."
+                                style={inputStyle}
+                            />
+                        </div>
+
+                        <div style={{ marginBottom: '1rem' }}>
+                            <label style={labelStyle}>Google Gemini API Key</label>
+                            <input
+                                type="password"
+                                value={googleKey}
+                                onChange={(e) => setGoogleKey(e.target.value)}
+                                placeholder="AIza..."
+                                style={inputStyle}
                             />
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
+                    <div style={{ padding: '1rem', backgroundColor: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <div>
+                                <label style={{ ...labelStyle, color: 'var(--accent-prompt-a)' }}>System Prompt A</label>
+                                <textarea
+                                    value={systemPromptA}
+                                    onChange={(e) => setSystemPromptA(e.target.value)}
+                                    rows={4}
+                                    style={{ ...inputStyle, resize: 'vertical', marginBottom: 0 }}
+                                />
+                            </div>
+                            <div>
+                                <label style={{ ...labelStyle, color: 'var(--accent-prompt-b)' }}>System Prompt B</label>
+                                <textarea
+                                    value={systemPromptB}
+                                    onChange={(e) => setSystemPromptB(e.target.value)}
+                                    rows={4}
+                                    style={{ ...inputStyle, resize: 'vertical', marginBottom: 0 }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                         <button
                             type="submit"
                             style={{

@@ -1,99 +1,85 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Header from './components/Layout/Header';
 import ChatInterface from './components/Chat/ChatInterface';
 import SettingsModal from './components/Settings/SettingsModal';
 import useChat from './hooks/useChat';
+import { PROVIDERS } from './services/ai';
 
 function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [settings, setSettings] = useState({
-    apiKey: '',
-    model: 'gpt-3.5-turbo',
-    systemPromptA: 'You are a helpful assistant.',
-    systemPromptB: 'You are a sarcastic assistant.'
+  const [settings, setSettings] = useState(() => {
+    const saved = localStorage.getItem('prompt_comparator_settings');
+    return saved ? JSON.parse(saved) : {
+      apiKey: '',
+      anthropicKey: '',
+      googleKey: '',
+      systemPromptA: 'You are a helpful assistant.',
+      systemPromptB: 'You are a helpful assistant.'
+    };
   });
 
-  // Load settings from localStorage on mount
-  useEffect(() => {
-    const savedSettings = localStorage.getItem('prompt-comparator-settings');
-    if (savedSettings) {
-      try {
-        setSettings(JSON.parse(savedSettings));
-      } catch (e) {
-        console.error('Failed to parse settings', e);
-      }
-    } else {
-      setIsSettingsOpen(true);
-    }
-  }, []);
-
-  const saveSettings = (newSettings) => {
-    setSettings(newSettings);
-    localStorage.setItem('prompt-comparator-settings', JSON.stringify(newSettings));
-  };
+  // Independent configurations for each side
+  const [configA, setConfigA] = useState({ provider: 'OPENAI', model: PROVIDERS.OPENAI.models[0].id });
+  const [configB, setConfigB] = useState({ provider: 'OPENAI', model: PROVIDERS.OPENAI.models[0].id });
 
   const chatA = useChat();
   const chatB = useChat();
 
-  const handleSendMessage = (content) => {
-    if (!settings.apiKey) {
-      setIsSettingsOpen(true);
-      return;
-    }
+  useEffect(() => {
+    localStorage.setItem('prompt_comparator_settings', JSON.stringify(settings));
+  }, [settings]);
 
-    chatA.sendMessage(content, settings.apiKey, settings.model, settings.systemPromptA);
-    chatB.sendMessage(content, settings.apiKey, settings.model, settings.systemPromptB);
+  const handleSaveSettings = (newSettings) => {
+    setSettings(newSettings);
+  };
+
+  const getApiKeyForProvider = (provider) => {
+    switch (provider) {
+      case 'OPENAI': return settings.apiKey;
+      case 'ANTHROPIC': return settings.anthropicKey;
+      case 'GOOGLE': return settings.googleKey;
+      default: return '';
+    }
+  };
+
+  const handleSendMessage = (content) => {
+    const keyA = getApiKeyForProvider(configA.provider);
+    const keyB = getApiKeyForProvider(configB.provider);
+
+    chatA.sendMessage(content, configA.provider, keyA, configA.model, settings.systemPromptA);
+    chatB.sendMessage(content, configB.provider, keyB, configB.model, settings.systemPromptB);
   };
 
   const handleClear = () => {
-    if (window.confirm('Are you sure you want to clear the conversation?')) {
-      chatA.clearChat();
-      chatB.clearChat();
-    }
+    chatA.clearChat();
+    chatB.clearChat();
   };
 
   const handleExport = () => {
-    const exportData = {
+    const data = {
       timestamp: new Date().toISOString(),
-      settings: testSettingsWithoutKey(settings),
-      conversations: {
-        promptA: {
-          systemPrompt: settings.systemPromptA,
-          messages: chatA.messages
-        },
-        promptB: {
-          systemPrompt: settings.systemPromptB,
-          messages: chatB.messages
-        }
-      }
+      configA: { ...configA, systemPrompt: settings.systemPromptA },
+      configB: { ...configB, systemPrompt: settings.systemPromptB },
+      chatHistoryA: chatA.messages,
+      chatHistoryB: chatB.messages
     };
 
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `prompt-comparison-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `comparison_${new Date().toISOString().slice(0, 10)}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
   };
-
-  // Helper to remove API key from export
-  const testSettingsWithoutKey = (s) => {
-    const { apiKey, ...rest } = s;
-    return rest;
-  };
-
-  const hasMessages = chatA.messages.length > 0 || chatB.messages.length > 0;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: 'var(--bg-primary)' }}>
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Header
         onOpenSettings={() => setIsSettingsOpen(true)}
         onClear={handleClear}
         onExport={handleExport}
-        hasMessages={hasMessages}
       />
 
       <ChatInterface
@@ -102,12 +88,16 @@ function App() {
         isLoadingA={chatA.isLoading}
         isLoadingB={chatB.isLoading}
         onSendMessage={handleSendMessage}
+        configA={configA}
+        configB={configB}
+        onConfigAChange={setConfigA}
+        onConfigBChange={setConfigB}
       />
 
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
-        onSave={saveSettings}
+        onSave={handleSaveSettings}
         initialSettings={settings}
       />
     </div>

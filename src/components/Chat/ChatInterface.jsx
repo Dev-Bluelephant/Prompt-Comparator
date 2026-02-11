@@ -1,8 +1,71 @@
 import React, { useState } from 'react';
 import { Send, Loader2 } from 'lucide-react';
 import ChatPane from './ChatPane';
+import { PROVIDERS } from '../../services/ai';
 
-const ChatInterface = ({ messagesA, messagesB, isLoadingA, isLoadingB, onSendMessage }) => {
+const ModelSelector = ({ config, onConfigChange, side }) => {
+    const accentColor = side === 'A' ? 'var(--accent-prompt-a)' : 'var(--accent-prompt-b)';
+
+    return (
+        <div style={{
+            display: 'flex',
+            gap: '0.5rem',
+            marginBottom: '0.5rem',
+            backgroundColor: 'var(--bg-tertiary)',
+            padding: '0.25rem',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--border-color)'
+        }}>
+            <select
+                value={config.provider}
+                onChange={(e) => onConfigChange({ ...config, provider: e.target.value, model: PROVIDERS[e.target.value].models[0].id })}
+                style={{
+                    backgroundColor: 'transparent',
+                    color: accentColor,
+                    fontWeight: 600,
+                    padding: '0.25rem',
+                    fontSize: '0.85rem',
+                    cursor: 'pointer'
+                }}
+            >
+                {Object.values(PROVIDERS).map(p => (
+                    <option key={p.id} value={p.name.toUpperCase() === 'OPENAI' ? 'OPENAI' : p.name.toUpperCase() === 'ANTHROPIC' ? 'ANTHROPIC' : 'GOOGLE'}>
+                        {p.name}
+                    </option>
+                ))}
+            </select>
+
+            <select
+                value={config.model}
+                onChange={(e) => onConfigChange({ ...config, model: e.target.value })}
+                style={{
+                    backgroundColor: 'transparent',
+                    color: 'var(--text-secondary)',
+                    padding: '0.25rem',
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    flex: 1
+                }}
+            >
+                {PROVIDERS[config.provider] && PROVIDERS[config.provider].models.map(m => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                ))}
+            </select>
+        </div>
+    );
+};
+
+const ChatInterface = ({
+    messagesA,
+    messagesB,
+    isLoadingA,
+    isLoadingB,
+    onSendMessage,
+    configA,
+    configB,
+    onConfigAChange,
+    onConfigBChange
+}) => {
     const [input, setInput] = useState('');
 
     const handleSubmit = (e) => {
@@ -21,7 +84,21 @@ const ChatInterface = ({ messagesA, messagesB, isLoadingA, isLoadingB, onSendMes
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 70px)' }}> {/* Adjust 70px for header height */}
+        <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 70px)' }}>
+
+            {/* Configuration Bar */}
+            <div style={{
+                display: 'flex',
+                borderBottom: '1px solid var(--border-color)',
+                backgroundColor: 'var(--bg-secondary)'
+            }}>
+                <div style={{ flex: 1, padding: '0.5rem 1rem', borderRight: '1px solid var(--border-color)' }}>
+                    <ModelSelector config={configA} onConfigChange={onConfigAChange} side="A" />
+                </div>
+                <div style={{ flex: 1, padding: '0.5rem 1rem' }}>
+                    <ModelSelector config={configB} onConfigChange={onConfigBChange} side="B" />
+                </div>
+            </div>
 
             {/* Split View Area */}
             <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
@@ -47,8 +124,8 @@ const ChatInterface = ({ messagesA, messagesB, isLoadingA, isLoadingB, onSendMes
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        placeholder="Type your message to both prompts..."
-                        rows={1} // You might want a dynamic text area here, but keeping simple for now
+                        placeholder="Type your message to both models..."
+                        rows={1}
                         style={{
                             width: '100%',
                             padding: '1rem 3.5rem 1rem 1.5rem',
@@ -58,7 +135,7 @@ const ChatInterface = ({ messagesA, messagesB, isLoadingA, isLoadingB, onSendMes
                             fontSize: '1rem',
                             resize: 'none',
                             boxShadow: 'var(--shadow-sm)',
-                            minHeight: '56px', // Ensure enough height
+                            minHeight: '56px',
                             maxHeight: '200px'
                         }}
                     />
@@ -80,9 +157,6 @@ const ChatInterface = ({ messagesA, messagesB, isLoadingA, isLoadingB, onSendMes
                         {(isLoadingA || isLoadingB) ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
                     </button>
                 </form>
-                <div style={{ textAlign: 'center', marginTop: '0.5rem', color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>
-                    Both models will receive your message simultaneously.
-                </div>
             </div>
         </div>
     );
