@@ -1,11 +1,15 @@
 # Prompt Comparator
 
-A simple, split-screen tool to compare two OpenAI System Prompts side-by-side.
+A powerful tool to compare AI System Prompts side-by-side using multiple providers (OpenAI, Anthropic, Gemini).
 
 ## Features
-- **Dual Chat**: Chat with two different "personas" simultaneously.
-- **Privacy**: API Key is stored only in your browser (LocalStorage).
-- **Export**: Download your chat datasets as JSON.
+-   **Multi-Model Support**: Compare OpenAI vs Anthropic, or Gemini vs OpenAI.
+    -   **OpenAI**: GPT-4o, GPT-4 Turbo, GPT-3.5 Turbo
+    -   **Anthropic**: Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Haiku
+    -   **Google**: Gemini 1.5 Pro, Gemini 1.5 Flash
+-   **Dual Chat**: Independent configuration for left and right panes.
+-   **Privacy**: API Keys are stored only in your browser (LocalStorage).
+-   **Export**: Download chat datasets as JSON.
 - **Responsive**: Works on desktop and mobile.
 
 ## How to use
