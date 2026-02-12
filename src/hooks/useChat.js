@@ -25,10 +25,13 @@ const useChat = () => {
 
         // Add user message immediately
         const userMsg = { role: 'user', content };
-        setMessages(prev => [...prev, userMsg]);
+        // Create the full history including the new user message
+        const updatedMessages = [...messages, userMsg];
+        setMessages(updatedMessages);
 
         try {
-            const assistantMsg = await sendMessageToAI(providerId.toLowerCase(), apiKey, modelId, messages, systemPrompt);
+            // Pass the updated history to the AI service
+            const assistantMsg = await sendMessageToAI(providerId.toLowerCase(), apiKey, modelId, updatedMessages, systemPrompt);
             setMessages(prev => [...prev, assistantMsg]);
         } catch (err) {
             console.error('Chat Error:', err);
