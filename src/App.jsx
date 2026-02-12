@@ -75,12 +75,14 @@ function App() {
     }
   };
 
-  const handleSendMessage = (content) => {
-    const keyA = getApiKeyForProvider(configA.provider);
-    const keyB = getApiKeyForProvider(configB.provider);
+  const handleSendMessageA = (content) => {
+    const key = getApiKeyForProvider(configA.provider);
+    chatA.sendMessage(content, configA.provider, key, configA.model, settings.systemPromptA);
+  };
 
-    chatA.sendMessage(content, configA.provider, keyA, configA.model, settings.systemPromptA);
-    chatB.sendMessage(content, configB.provider, keyB, configB.model, settings.systemPromptB);
+  const handleSendMessageB = (content) => {
+    const key = getApiKeyForProvider(configB.provider);
+    chatB.sendMessage(content, configB.provider, key, configB.model, settings.systemPromptB);
   };
 
   const handleClear = () => {
@@ -120,7 +122,8 @@ function App() {
         messagesB={chatB.messages}
         isLoadingA={chatA.isLoading}
         isLoadingB={chatB.isLoading}
-        onSendMessage={handleSendMessage}
+        onSendMessageA={handleSendMessageA}
+        onSendMessageB={handleSendMessageB}
         configA={configA}
         configB={configB}
         onConfigAChange={setConfigA}

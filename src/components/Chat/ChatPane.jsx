@@ -18,21 +18,7 @@ const ChatPane = ({ messages, promptVariant, isLoading }) => {
             backgroundColor: 'var(--bg-primary)',
             borderRight: promptVariant === 'A' ? '1px solid var(--border-color)' : 'none'
         }}>
-            <div style={{
-                padding: '1rem',
-                borderBottom: '1px solid var(--border-color)',
-                position: 'sticky',
-                top: 0,
-                backgroundColor: 'var(--bg-secondary)',
-                zIndex: 10,
-                fontWeight: 600,
-                color: promptVariant === 'A' ? 'var(--accent-prompt-a)' : 'var(--accent-prompt-b)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-            }}>
-                <span>Preview: Prompt {promptVariant}</span>
-            </div>
+
 
             <div style={{ flex: 1 }}>
                 {messages.length === 0 ? (
