@@ -10,8 +10,11 @@ export const PROVIDERS = {
             { id: 'gpt-5.3-codex', name: 'GPT-5.3 Codex (New)' },
             { id: 'gpt-5.2', name: 'GPT-5.2' },
             { id: 'gpt-5.2-pro', name: 'GPT-5.2 Pro' },
+            { id: 'gpt-5-mini', name: 'GPT-5 Mini' },
+            { id: 'gpt-5-nano', name: 'GPT-5 Nano' },
             { id: 'o3', name: 'OpenAI o3' },
             { id: 'gpt-4.1', name: 'GPT-4.1' },
+            { id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini' },
             { id: 'gpt-4o', name: 'GPT-4o (Legacy)' }
         ]
     },
