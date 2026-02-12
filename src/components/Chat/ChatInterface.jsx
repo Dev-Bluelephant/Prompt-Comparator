@@ -62,25 +62,13 @@ const ModelSelector = ({ config, onConfigChange, side, availableModels }) => {
     );
 };
 
-const ChatInterface = ({
-    messagesA,
-    messagesB,
-    isLoadingA,
-    isLoadingB,
-    onSendMessage,
-    configA,
-    configB,
-    onConfigAChange,
-    onConfigBChange,
-    availableModels = PROVIDERS // Default fallback
-}) => {
+const ChatInput = ({ onSend, isLoading, placeholder }) => {
     const [input, setInput] = useState('');
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!input.trim() || isLoadingA || isLoadingB) return;
-
-        onSendMessage(input);
+        if (!input.trim() || isLoading) return;
+        onSend(input);
         setInput('');
     };
 
@@ -92,79 +80,93 @@ const ChatInterface = ({
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 70px)' }}>
-
-            {/* Configuration Bar */}
-            <div style={{
-                display: 'flex',
-                borderBottom: '1px solid var(--border-color)',
-                backgroundColor: 'var(--bg-secondary)'
-            }}>
-                <div style={{ flex: 1, padding: '0.5rem 1rem', borderRight: '1px solid var(--border-color)' }}>
-                    <ModelSelector config={configA} onConfigChange={onConfigAChange} side="A" availableModels={availableModels} />
-                </div>
-                <div style={{ flex: 1, padding: '0.5rem 1rem' }}>
-                    <ModelSelector config={configB} onConfigChange={onConfigBChange} side="B" availableModels={availableModels} />
-                </div>
-            </div>
-
-            {/* Split View Area */}
-            <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-                <ChatPane messages={messagesA} promptVariant="A" isLoading={isLoadingA} />
-                <ChatPane messages={messagesB} promptVariant="B" isLoading={isLoadingB} />
-            </div>
-
-            {/* Input Area */}
-            <div style={{
-                padding: '1.5rem',
-                backgroundColor: 'var(--bg-secondary)',
-                borderTop: '1px solid var(--border-color)'
-            }}>
-                <form
-                    onSubmit={handleSubmit}
+        <div style={{
+            padding: '1rem',
+            backgroundColor: 'var(--bg-secondary)',
+            borderTop: '1px solid var(--border-color)'
+        }}>
+            <form onSubmit={handleSubmit} style={{ position: 'relative' }}>
+                <textarea
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={placeholder}
+                    rows={1}
                     style={{
-                        maxWidth: '1200px',
-                        margin: '0 auto',
-                        position: 'relative'
+                        width: '100%',
+                        padding: '0.75rem 3rem 0.75rem 1rem',
+                        borderRadius: 'var(--radius-full)',
+                        backgroundColor: 'var(--bg-tertiary)',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.95rem',
+                        resize: 'none',
+                        boxShadow: 'var(--shadow-sm)',
+                        minHeight: '46px',
+                        maxHeight: '150px'
+                    }}
+                />
+                <button
+                    type="submit"
+                    disabled={!input.trim() || isLoading}
+                    style={{
+                        position: 'absolute',
+                        right: '0.5rem',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        padding: '0.4rem',
+                        borderRadius: '50%',
+                        backgroundColor: (!input.trim() || isLoading) ? 'transparent' : 'var(--accent-primary)',
+                        color: (!input.trim() || isLoading) ? 'var(--text-tertiary)' : 'white',
+                        transition: 'var(--transition-fast)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
                     }}
                 >
-                    <textarea
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder="Type your message to both models..."
-                        rows={1}
-                        style={{
-                            width: '100%',
-                            padding: '1rem 3.5rem 1rem 1.5rem',
-                            borderRadius: 'var(--radius-full)',
-                            backgroundColor: 'var(--bg-tertiary)',
-                            color: 'var(--text-primary)',
-                            fontSize: '1rem',
-                            resize: 'none',
-                            boxShadow: 'var(--shadow-sm)',
-                            minHeight: '56px',
-                            maxHeight: '200px'
-                        }}
-                    />
-                    <button
-                        type="submit"
-                        disabled={!input.trim() || isLoadingA || isLoadingB}
-                        style={{
-                            position: 'absolute',
-                            right: '0.75rem',
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            padding: '0.5rem',
-                            borderRadius: '50%',
-                            backgroundColor: (!input.trim() || isLoadingA || isLoadingB) ? 'transparent' : 'var(--accent-primary)',
-                            color: (!input.trim() || isLoadingA || isLoadingB) ? 'var(--text-tertiary)' : 'white',
-                            transition: 'var(--transition-fast)'
-                        }}
-                    >
-                        {(isLoadingA || isLoadingB) ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
-                    </button>
-                </form>
+                    {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+                </button>
+            </form>
+        </div>
+    );
+};
+
+const ChatInterface = ({
+    messagesA,
+    messagesB,
+    isLoadingA,
+    isLoadingB,
+    onSendMessageA,
+    onSendMessageB,
+    configA,
+    configB,
+    onConfigAChange,
+    onConfigBChange,
+    availableModels = PROVIDERS
+}) => {
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 70px)' }}>
+
+            {/* Split View Container */}
+            <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+
+                {/* Side A */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--border-color)' }}>
+                    <div style={{ padding: '0.5rem 1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-secondary)' }}>
+                        <ModelSelector config={configA} onConfigChange={onConfigAChange} side="A" availableModels={availableModels} />
+                    </div>
+                    <ChatPane messages={messagesA} promptVariant="A" isLoading={isLoadingA} />
+                    <ChatInput onSend={onSendMessageA} isLoading={isLoadingA} placeholder="Message Model A..." />
+                </div>
+
+                {/* Side B */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ padding: '0.5rem 1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-secondary)' }}>
+                        <ModelSelector config={configB} onConfigChange={onConfigBChange} side="B" availableModels={availableModels} />
+                    </div>
+                    <ChatPane messages={messagesB} promptVariant="B" isLoading={isLoadingB} />
+                    <ChatInput onSend={onSendMessageB} isLoading={isLoadingB} placeholder="Message Model B..." />
+                </div>
+
             </div>
         </div>
     );
