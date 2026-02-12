@@ -141,3 +141,68 @@ const sendGoogle = async (apiKey, modelId, messages, systemPrompt) => {
     const response = result.response;
     return { role: 'assistant', content: response.text() };
 };
+
+/**
+ * Fetches available models from the provider
+ * @param {string} providerId 
+ * @param {string} apiKey 
+ * @returns {Promise<Array>} List of models {id, name}
+ */
+export const fetchAvailableModels = async (providerId, apiKey) => {
+    if (!apiKey) return [];
+
+    try {
+        switch (providerId) {
+            case 'openai': {
+                const res = await fetch('https://api.openai.com/v1/models', {
+                    headers: { 'Authorization': `Bearer ${apiKey}` }
+                });
+                if (!res.ok) throw new Error('Failed to fetch OpenAI models');
+                const data = await res.json();
+                return data.data
+                    .filter(m => m.id.includes('gpt') || m.id.includes('o1')) // Filter relevant models
+                    .map(m => ({ id: m.id, name: m.id }))
+                    .sort((a, b) => a.id.localeCompare(b.id));
+            }
+            case 'anthropic': {
+                // Anthropic doesn't have a CORS-friendly list endpoint for browser usually, 
+                // but we can try the standard endpoint or fallback to static if it fails due to CORS.
+                // For now, let's try a direct fetch, but be graceful.
+                // Actually, Anthropic browser usage usually requires a proxy for listing if CORS is strict.
+                // Let's return static list if fetch fails, to be safe.
+                try {
+                    const res = await fetch('https://api.anthropic.com/v1/models', {
+                        headers: {
+                            'x-api-key': apiKey,
+                            'anthropic-version': '2023-06-01',
+                            'content-type': 'application/json'
+                        }
+                    });
+                    if (!res.ok) throw new Error('Failed');
+                    const data = await res.json();
+                    return data.data.map(m => ({ id: m.id, name: m.display_name || m.id }));
+                } catch (e) {
+                    console.warn('Anthropic Fetch failed (likely CORS), using static list');
+                    return PROVIDERS.ANTHROPIC.models;
+                }
+            }
+            case 'google': {
+                // Google Gemini List Models
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+                if (!res.ok) throw new Error('Failed to fetch Gemini models');
+                const data = await res.json();
+                return data.models
+                    .filter(m => m.name.includes('gemini'))
+                    .map(m => {
+                        const id = m.name.replace('models/', '');
+                        return { id: id, name: m.displayName || id };
+                    });
+            }
+            default:
+                return [];
+        }
+    } catch (error) {
+        console.error(`Error fetching models for ${providerId}:`, error);
+        return []; // Return empty or static fallback could be handled upstream
+    }
+};

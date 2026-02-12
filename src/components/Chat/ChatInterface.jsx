@@ -3,8 +3,9 @@ import { Send, Loader2 } from 'lucide-react';
 import ChatPane from './ChatPane';
 import { PROVIDERS } from '../../services/ai';
 
-const ModelSelector = ({ config, onConfigChange, side }) => {
+const ModelSelector = ({ config, onConfigChange, side, availableModels }) => {
     const accentColor = side === 'A' ? 'var(--accent-prompt-a)' : 'var(--accent-prompt-b)';
+    const models = availableModels[config.provider]?.models || [];
 
     return (
         <div style={{
@@ -18,7 +19,7 @@ const ModelSelector = ({ config, onConfigChange, side }) => {
         }}>
             <select
                 value={config.provider}
-                onChange={(e) => onConfigChange({ ...config, provider: e.target.value, model: PROVIDERS[e.target.value].models[0].id })}
+                onChange={(e) => onConfigChange({ ...config, provider: e.target.value, model: availableModels[e.target.value].models[0].id })}
                 style={{
                     backgroundColor: 'var(--bg-tertiary)',
                     color: accentColor,
@@ -31,7 +32,7 @@ const ModelSelector = ({ config, onConfigChange, side }) => {
                     outline: 'none'
                 }}
             >
-                {Object.values(PROVIDERS).map(p => (
+                {Object.values(availableModels).map(p => (
                     <option key={p.id} value={p.name.toUpperCase() === 'OPENAI' ? 'OPENAI' : p.name.toUpperCase() === 'ANTHROPIC' ? 'ANTHROPIC' : 'GOOGLE'}>
                         {p.name}
                     </option>
@@ -53,7 +54,7 @@ const ModelSelector = ({ config, onConfigChange, side }) => {
                     outline: 'none'
                 }}
             >
-                {PROVIDERS[config.provider] && PROVIDERS[config.provider].models.map(m => (
+                {models.map(m => (
                     <option key={m.id} value={m.id}>{m.name}</option>
                 ))}
             </select>
@@ -70,7 +71,8 @@ const ChatInterface = ({
     configA,
     configB,
     onConfigAChange,
-    onConfigBChange
+    onConfigBChange,
+    availableModels = PROVIDERS // Default fallback
 }) => {
     const [input, setInput] = useState('');
 
@@ -99,10 +101,10 @@ const ChatInterface = ({
                 backgroundColor: 'var(--bg-secondary)'
             }}>
                 <div style={{ flex: 1, padding: '0.5rem 1rem', borderRight: '1px solid var(--border-color)' }}>
-                    <ModelSelector config={configA} onConfigChange={onConfigAChange} side="A" />
+                    <ModelSelector config={configA} onConfigChange={onConfigAChange} side="A" availableModels={availableModels} />
                 </div>
                 <div style={{ flex: 1, padding: '0.5rem 1rem' }}>
-                    <ModelSelector config={configB} onConfigChange={onConfigBChange} side="B" />
+                    <ModelSelector config={configB} onConfigChange={onConfigBChange} side="B" availableModels={availableModels} />
                 </div>
             </div>
 

@@ -3,7 +3,7 @@ import Header from './components/Layout/Header';
 import ChatInterface from './components/Chat/ChatInterface';
 import SettingsModal from './components/Settings/SettingsModal';
 import useChat from './hooks/useChat';
-import { PROVIDERS } from './services/ai';
+import { PROVIDERS, fetchAvailableModels } from './services/ai';
 
 function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -22,12 +22,45 @@ function App() {
   const [configA, setConfigA] = useState({ provider: 'OPENAI', model: PROVIDERS.OPENAI.models[0].id });
   const [configB, setConfigB] = useState({ provider: 'OPENAI', model: PROVIDERS.OPENAI.models[0].id });
 
+  // Dynamic models state
+  const [availableModels, setAvailableModels] = useState(PROVIDERS);
+
   const chatA = useChat();
   const chatB = useChat();
 
   useEffect(() => {
     localStorage.setItem('prompt_comparator_settings', JSON.stringify(settings));
+    refreshModels();
   }, [settings]);
+
+  // Initial fetch on mount
+  useEffect(() => {
+    refreshModels();
+  }, []);
+
+  const refreshModels = async () => {
+    const newModels = { ...PROVIDERS };
+
+    // Fetch OpenAI
+    if (settings.apiKey) {
+      const models = await fetchAvailableModels('openai', settings.apiKey);
+      if (models.length > 0) newModels.OPENAI.models = models;
+    }
+
+    // Fetch Anthropic
+    if (settings.anthropicKey) {
+      const models = await fetchAvailableModels('anthropic', settings.anthropicKey);
+      if (models.length > 0) newModels.ANTHROPIC.models = models;
+    }
+
+    // Fetch Google
+    if (settings.googleKey) {
+      const models = await fetchAvailableModels('google', settings.googleKey);
+      if (models.length > 0) newModels.GOOGLE.models = models;
+    }
+
+    setAvailableModels(newModels);
+  };
 
   const handleSaveSettings = (newSettings) => {
     setSettings(newSettings);
@@ -92,6 +125,7 @@ function App() {
         configB={configB}
         onConfigAChange={setConfigA}
         onConfigBChange={setConfigB}
+        availableModels={availableModels}
       />
 
       <SettingsModal
