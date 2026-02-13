@@ -191,6 +191,7 @@ function App() {
         onOpenSettings={() => setIsSettingsOpen(true)}
         onClear={handleClear}
         onExport={handleExport}
+        hasMessages={chatA.messages.length > 0 || chatB.messages.length > 0}
       />
 
       <ChatInterface

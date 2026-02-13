@@ -38,27 +38,25 @@ const Header = ({ onOpenSettings, onClear, onExport, hasMessages }) => {
 
             <div style={{ display: 'flex', gap: '0.75rem' }}>
                 {hasMessages && (
-                    <>
-                        <button
-                            onClick={onClear}
-                            style={{ ...buttonStyle, color: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)' }}
-                            title="Clear Chat"
-                        >
-                            <Trash2 size={18} />
-                            <span>Clear</span>
-                        </button>
-                        <button
-                            onClick={onExport}
-                            style={buttonStyle}
-                            title="Export Dataset"
-                            onMouseOver={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
-                            onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
-                        >
-                            <Download size={18} />
-                            <span>Export JSON</span>
-                        </button>
-                    </>
+                    <button
+                        onClick={onClear}
+                        style={{ ...buttonStyle, color: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)' }}
+                        title="Clear Chat"
+                    >
+                        <Trash2 size={18} />
+                        <span>Clear</span>
+                    </button>
                 )}
+                <button
+                    onClick={onExport}
+                    style={buttonStyle}
+                    title="Download Excel Dataset"
+                    onMouseOver={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+                    onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+                >
+                    <Download size={18} />
+                    <span>Export Excel</span>
+                </button>
 
                 <button
                     onClick={onOpenSettings}
