@@ -92,58 +92,97 @@ function App() {
     chatB.clearChat();
   };
 
-  const handleExport = () => {
-    // CSV Header with Dynamic Prompt Names
-    // Adding BOM (\uFEFF) so Excel opens it with correct UTF-8 encoding
-    const header = ['Timestamp', 'User Message', `${settings.promptNameA} (Response)`, `${settings.promptNameB} (Response)`];
-    const rows = [header];
+  const handleExport = async () => {
+    // Dynamic import to avoid loading heavy libraries on initial page load
+    const ExcelJS = await import('exceljs');
+    const { saveAs } = await import('file-saver');
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Comparison');
+
+    // Define Columns
+    worksheet.columns = [
+      { header: 'Date', key: 'date', width: 15 },
+      { header: 'User Message', key: 'user', width: 40 },
+      { header: `${settings.promptNameA} (Response)`, key: 'respA', width: 40 },
+      { header: `${settings.promptNameB} (Response)`, key: 'respB', width: 40 },
+    ];
+
+    // Style Header Row
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF2D3748' } // Dark gray background
+    };
+    headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
 
     const historyA = chatA.messages;
     const historyB = chatB.messages;
     const maxLength = Math.max(historyA.length, historyB.length);
 
     for (let i = 0; i < maxLength; i++) {
-      // Find user message (synced across both)
       const msgA = historyA[i];
       const msgB = historyB[i];
 
+      // Identify User Content (Shared)
       let userContent = '';
-      let respA = '';
-      let respB = '';
-
-      // If it's a user message, grab content
       if (msgA?.role === 'user') userContent = msgA.content;
       else if (msgB?.role === 'user') userContent = msgB.content;
 
-      // If current index is user, next should be assistant
       if (userContent) {
         const nextA = historyA[i + 1];
         const nextB = historyB[i + 1];
 
-        if (nextA?.role === 'assistant') respA = nextA.content;
-        if (nextB?.role === 'assistant') respB = nextB.content;
+        let respA = (nextA?.role === 'assistant') ? nextA.content : '';
+        let respB = (nextB?.role === 'assistant') ? nextB.content : '';
 
-        // Escape quotes for CSV
-        const clean = (text) => `"${(text || '').replace(/"/g, '""')}"`;
+        const row = worksheet.addRow({
+          date: new Date().toISOString().slice(0, 10),
+          user: userContent,
+          respA: respA,
+          respB: respB
+        });
 
-        rows.push([
-          new Date().toISOString(),
-          clean(userContent),
-          clean(respA),
-          clean(respB)
-        ]);
+        // Apply Styles to Cells
+
+        // User Cell (Cyan/Blueish)
+        const userCell = row.getCell('user');
+        userCell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFBBDEFB' } // Light Blue (simulating Cyan)
+        };
+        userCell.alignment = { wrapText: true, vertical: 'top' };
+
+        // Response A Cell (Green)
+        const cellA = row.getCell('respA');
+        cellA.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFC8E6C9' } // Light Green
+        };
+        cellA.alignment = { wrapText: true, vertical: 'top' };
+
+        // Response B Cell (Purple)
+        const cellB = row.getCell('respB');
+        cellB.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFE1BEE7' } // Light Purple
+        };
+        cellB.alignment = { wrapText: true, vertical: 'top' };
+
+        // Date Alignment
+        row.getCell('date').alignment = { vertical: 'top' };
       }
     }
 
-    const csvContent = "\uFEFF" + rows.map(e => e.join(",")).join("\n");
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `dataset_${settings.promptNameA}_vs_${settings.promptNameB}_${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    // Write buffer and save
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `dataset_${settings.promptNameA}_vs_${settings.promptNameB}_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
   return (

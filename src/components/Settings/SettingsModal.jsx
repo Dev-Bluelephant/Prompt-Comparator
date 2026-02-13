@@ -137,7 +137,22 @@ const SettingsModal = ({ isOpen, onClose, onSave, initialSettings }) => {
                     <div style={{ padding: '1rem', backgroundColor: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                             <div>
-                                <label style={{ ...labelStyle, color: 'var(--accent-prompt-a)' }}>System Prompt A</label>
+                                <input
+                                    type="text"
+                                    value={promptNameA}
+                                    onChange={(e) => setPromptNameA(e.target.value)}
+                                    placeholder="Prompt Name A"
+                                    style={{
+                                        ...inputStyle,
+                                        marginBottom: '0.5rem',
+                                        fontWeight: '600',
+                                        color: 'var(--accent-prompt-a)',
+                                        border: 'none',
+                                        padding: '0',
+                                        background: 'transparent',
+                                        fontSize: '0.9rem'
+                                    }}
+                                />
                                 <textarea
                                     value={systemPromptA}
                                     onChange={(e) => setSystemPromptA(e.target.value)}
@@ -146,7 +161,22 @@ const SettingsModal = ({ isOpen, onClose, onSave, initialSettings }) => {
                                 />
                             </div>
                             <div>
-                                <label style={{ ...labelStyle, color: 'var(--accent-prompt-b)' }}>System Prompt B</label>
+                                <input
+                                    type="text"
+                                    value={promptNameB}
+                                    onChange={(e) => setPromptNameB(e.target.value)}
+                                    placeholder="Prompt Name B"
+                                    style={{
+                                        ...inputStyle,
+                                        marginBottom: '0.5rem',
+                                        fontWeight: '600',
+                                        color: 'var(--accent-prompt-b)',
+                                        border: 'none',
+                                        padding: '0',
+                                        background: 'transparent',
+                                        fontSize: '0.9rem'
+                                    }}
+                                />
                                 <textarea
                                     value={systemPromptB}
                                     onChange={(e) => setSystemPromptB(e.target.value)}
@@ -154,28 +184,6 @@ const SettingsModal = ({ isOpen, onClose, onSave, initialSettings }) => {
                                     style={{ ...inputStyle, resize: 'vertical', marginBottom: 0 }}
                                 />
                             </div>
-                        </div>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
-                        <div>
-                            <label style={labelStyle}>Prompt Name A</label>
-                            <input
-                                type="text"
-                                value={promptNameA}
-                                onChange={(e) => setPromptNameA(e.target.value)}
-                                placeholder="e.g. Sales Persona"
-                                style={inputStyle}
-                            />
-                        </div>
-                        <div>
-                            <label style={labelStyle}>Prompt Name B</label>
-                            <input
-                                type="text"
-                                value={promptNameB}
-                                onChange={(e) => setPromptNameB(e.target.value)}
-                                placeholder="e.g. Standard Bot"
-                                style={inputStyle}
-                            />
                         </div>
                     </div>
 
