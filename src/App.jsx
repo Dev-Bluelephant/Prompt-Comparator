@@ -14,7 +14,9 @@ function App() {
       anthropicKey: '',
       googleKey: '',
       systemPromptA: 'You are a helpful assistant.',
-      systemPromptB: 'You are a helpful assistant.'
+      systemPromptB: 'You are a helpful assistant.',
+      promptNameA: 'Prompt A',
+      promptNameB: 'Prompt B'
     };
   });
 
@@ -91,19 +93,54 @@ function App() {
   };
 
   const handleExport = () => {
-    const data = {
-      timestamp: new Date().toISOString(),
-      configA: { ...configA, systemPrompt: settings.systemPromptA },
-      configB: { ...configB, systemPrompt: settings.systemPromptB },
-      chatHistoryA: chatA.messages,
-      chatHistoryB: chatB.messages
-    };
+    // CSV Header with Dynamic Prompt Names
+    // Adding BOM (\uFEFF) so Excel opens it with correct UTF-8 encoding
+    const header = ['Timestamp', 'User Message', `${settings.promptNameA} (Response)`, `${settings.promptNameB} (Response)`];
+    const rows = [header];
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const historyA = chatA.messages;
+    const historyB = chatB.messages;
+    const maxLength = Math.max(historyA.length, historyB.length);
+
+    for (let i = 0; i < maxLength; i++) {
+      // Find user message (synced across both)
+      const msgA = historyA[i];
+      const msgB = historyB[i];
+
+      let userContent = '';
+      let respA = '';
+      let respB = '';
+
+      // If it's a user message, grab content
+      if (msgA?.role === 'user') userContent = msgA.content;
+      else if (msgB?.role === 'user') userContent = msgB.content;
+
+      // If current index is user, next should be assistant
+      if (userContent) {
+        const nextA = historyA[i + 1];
+        const nextB = historyB[i + 1];
+
+        if (nextA?.role === 'assistant') respA = nextA.content;
+        if (nextB?.role === 'assistant') respB = nextB.content;
+
+        // Escape quotes for CSV
+        const clean = (text) => `"${(text || '').replace(/"/g, '""')}"`;
+
+        rows.push([
+          new Date().toISOString(),
+          clean(userContent),
+          clean(respA),
+          clean(respB)
+        ]);
+      }
+    }
+
+    const csvContent = "\uFEFF" + rows.map(e => e.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `comparison_${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `dataset_${settings.promptNameA}_vs_${settings.promptNameB}_${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

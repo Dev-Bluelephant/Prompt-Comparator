@@ -8,6 +8,8 @@ const SettingsModal = ({ isOpen, onClose, onSave, initialSettings }) => {
     const [model, setModel] = useState('gpt-3.5-turbo');
     const [systemPromptA, setSystemPromptA] = useState('');
     const [systemPromptB, setSystemPromptB] = useState('');
+    const [promptNameA, setPromptNameA] = useState('');
+    const [promptNameB, setPromptNameB] = useState('');
 
     useEffect(() => {
         if (isOpen) {
@@ -16,6 +18,8 @@ const SettingsModal = ({ isOpen, onClose, onSave, initialSettings }) => {
             setGoogleKey(initialSettings.googleKey || '');
             setSystemPromptA(initialSettings.systemPromptA || 'You are a helpful assistant.');
             setSystemPromptB(initialSettings.systemPromptB || 'You are a helpful assistant.');
+            setPromptNameA(initialSettings.promptNameA || 'Prompt A');
+            setPromptNameB(initialSettings.promptNameB || 'Prompt B');
         }
     }, [isOpen, initialSettings]);
 
@@ -28,7 +32,10 @@ const SettingsModal = ({ isOpen, onClose, onSave, initialSettings }) => {
             anthropicKey,
             googleKey,
             systemPromptA,
-            systemPromptB
+            systemPromptA,
+            systemPromptB,
+            promptNameA,
+            promptNameB
         });
         onClose();
     };
@@ -147,6 +154,28 @@ const SettingsModal = ({ isOpen, onClose, onSave, initialSettings }) => {
                                     style={{ ...inputStyle, resize: 'vertical', marginBottom: 0 }}
                                 />
                             </div>
+                        </div>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
+                        <div>
+                            <label style={labelStyle}>Prompt Name A</label>
+                            <input
+                                type="text"
+                                value={promptNameA}
+                                onChange={(e) => setPromptNameA(e.target.value)}
+                                placeholder="e.g. Sales Persona"
+                                style={inputStyle}
+                            />
+                        </div>
+                        <div>
+                            <label style={labelStyle}>Prompt Name B</label>
+                            <input
+                                type="text"
+                                value={promptNameB}
+                                onChange={(e) => setPromptNameB(e.target.value)}
+                                placeholder="e.g. Standard Bot"
+                                style={inputStyle}
+                            />
                         </div>
                     </div>
 
